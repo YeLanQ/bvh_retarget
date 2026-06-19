@@ -1,0 +1,19 @@
+schema_version = "1.0.0"
+
+id = "bvh_retarget"
+version = "1.0.0"
+name = "BVH Retarget"
+tagline = "Retarget BVH motion capture data to any Blender armature"
+maintainer = "Kimodo Bridge Contributors"
+type = "add-on"
+
+blender_version_min = "4.2.0"
+
+license = [
+  "SPDX:GPL-2.0-or-later",
+]
+
+tags = ["Animation"]
+
+[blender]
+version_min = "4.2.0"
