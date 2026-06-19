@@ -36,12 +36,12 @@ class BVHRETARGET_BoneMappingItem(PropertyGroup):
         name="Mode",
         description="How this bone pair is driven",
         items=[
-            ("COPY_ROTATION", "Copy Rotation", "Copy only rotation; root bone also gets Copy Location"),
-            ("COPY_TRANSFORMS", "Copy Transforms", "Copy location + rotation + scale together"),
-            ("CHILD_OF", "Child Of", "Full parent-child relationship; preserves rest-pose offset"),
+            ("COPY_ROTATION", "Copy Rotation", "Copy rotation in local space; root bone also gets Copy Location in world space"),
+            ("COPY_TRANSFORMS", "Copy Transforms", "Copy location + rotation + scale together in local space"),
+            ("CHILD_OF", "Child Of", "Child Of constraint with automatic inverse matrix; preserves rest-pose offset"),
             ("CHILD_OF_ROTATION", "Child Of (Rotation)", "Child Of constraint with only rotation enabled"),
         ],
-        default="CHILD_OF",
+        default="COPY_ROTATION",
     )
 
 

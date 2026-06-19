@@ -180,9 +180,9 @@ def apply_retargeting_constraints(
         elif mode == "COPY_TRANSFORMS":
             _add_copy_transforms(tgt_pbone, source_arm, src_name)
         elif mode == "CHILD_OF":
-            _add_child_of(tgt_pbone, source_arm, src_name)
+            _add_child_of(tgt_pbone, source_arm, target_arm, src_name, is_root)
         elif mode == "CHILD_OF_ROTATION":
-            _add_child_of(tgt_pbone, source_arm, src_name, rotation_only=True)
+            _add_child_of(tgt_pbone, source_arm, target_arm, src_name, is_root, rotation_only=True)
         else:
             warnings.append(f"Unknown retarget mode '{mode}' for '{tgt_name}' — using Copy Rotation.")
             _add_copy_rotation(tgt_pbone, source_arm, src_name, is_root)
@@ -197,15 +197,12 @@ def apply_retargeting_constraints(
 # ---------------------------------------------------------------------------
 
 def _add_copy_rotation(pbone, source_arm, src_name: str, is_root: bool = False) -> None:
-    """Copy Rotation in local space; root bone also gets Copy Location."""
+    """Copy Rotation; root bone gets Copy Location in WORLD space."""
     if is_root:
         loc = pbone.constraints.new("COPY_LOCATION")
         loc.name = CONSTRAINT_PREFIX + "Location"
         loc.target = source_arm
         loc.subtarget = src_name
-        loc.mix_mode = 'REPLACE'
-        loc.owner_space = 'LOCAL'
-        loc.target_space = 'LOCAL'
         loc.use_offset = False
 
     rot = pbone.constraints.new("COPY_ROTATION")
@@ -228,12 +225,23 @@ def _add_copy_transforms(pbone, source_arm, src_name: str) -> None:
     ct.target_space = 'LOCAL'
 
 
-def _add_child_of(pbone, source_arm, src_name: str, rotation_only: bool = False) -> None:
+def _add_child_of(pbone, source_arm, target_arm, src_name: str,
+                  is_root: bool = False,
+                  rotation_only: bool = False) -> None:
     """
     Child Of constraint with the inverse matrix set automatically.
     When rotation_only is True, only the rotation channels are enabled.
+    Root bones additionally get a Copy Location constraint.
     """
     use_location = not rotation_only
+
+    # Root bone also gets a dedicated Copy Location constraint (WORLD space)
+    if is_root and use_location:
+        loc = pbone.constraints.new("COPY_LOCATION")
+        loc.name = CONSTRAINT_PREFIX + "Location"
+        loc.target = source_arm
+        loc.subtarget = src_name
+        loc.use_offset = False
 
     co = pbone.constraints.new("CHILD_OF")
     co.name = CONSTRAINT_PREFIX + ("ChildOfRotation" if rotation_only else "ChildOf")
@@ -249,13 +257,16 @@ def _add_child_of(pbone, source_arm, src_name: str, rotation_only: bool = False)
     co.use_scale_y = False
     co.use_scale_z = False
 
-    # Set Inverse: invert the source bone's rest pose world matrix so the
-    # target bone stays exactly where it is when the constraint first fires.
-    # Using the bone's rest pose matrix instead of current pose matrix
-    # ensures correct behavior regardless of which frame the constraint is applied on.
+    # Set Inverse: store the offset between source rest pose and target rest pose.
+    # Formula: inverse = source_rest_world.inverted() @ target_current_world
+    # This way:
+    #   At rest: result = source_rest_world @ inverse = target_current_world  (stays in place)
+    #   Animated: result = source_anim_world @ inverse = delta @ target_current_world (follows)
     src_bone = source_arm.data.bones.get(src_name)
     if src_bone:
-        co.inverse_matrix = (source_arm.matrix_world @ src_bone.matrix_local).inverted()
+        src_rest_world = source_arm.matrix_world @ src_bone.matrix_local
+        tgt_current_world = target_arm.matrix_world @ pbone.matrix
+        co.inverse_matrix = src_rest_world.inverted() @ tgt_current_world
     else:
         co.inverse_matrix = mathutils.Matrix.Identity(4)
 
