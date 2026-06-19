@@ -3,7 +3,7 @@ BVH Retarget — Core retargeting logic
 Constraint-based motion retargeting from source armature to target armature.
 
 Three modes per bone pair:
-  COPY_ROTATION   Copy Rotation in WORLD space.
+  COPY_ROTATION   Copy Rotation in WORLD space for all bones.
                   Root bone additionally gets Copy Location.
                   Good for rigs with the same rest pose as source.
 
@@ -210,8 +210,8 @@ def _add_copy_rotation(pbone, source_arm, src_name: str, is_root: bool = False) 
     rot.target = source_arm
     rot.subtarget = src_name
     rot.mix_mode = 'REPLACE'
-    rot.owner_space = 'LOCAL'
-    rot.target_space = 'LOCAL'
+    rot.owner_space = 'WORLD'
+    rot.target_space = 'WORLD'
 
 
 def _add_copy_transforms(pbone, source_arm, src_name: str) -> None:
