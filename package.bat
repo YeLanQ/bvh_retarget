@@ -1,0 +1,4 @@
+@echo off
+echo Creating BVH Retarget package...
+powershell -ExecutionPolicy Bypass -File "%~dp0create_package.ps1"
+pause
