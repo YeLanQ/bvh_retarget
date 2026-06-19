@@ -90,7 +90,7 @@ class BVHRETARGET_OT_ImportBVH(Operator):
                 axis_forward='-Z',
                 axis_up='Y',
                 target='ARMATURE',
-                global_scale=0.01,   # BVH is usually in cm; Blender expects meters
+                global_scale=s.bvh_scale,   # Use configurable scale factor
                 frame_start=1,
                 use_fps_scale=False,
                 update_scene_fps=False,

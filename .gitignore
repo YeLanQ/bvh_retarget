@@ -33,3 +33,7 @@ Desktop.ini
 
 # Temp
 temp_package/
+
+# Windows device names (accidental redirections)
+nul
+NUL

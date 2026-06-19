@@ -77,6 +77,15 @@ class BVHRETARGET_SceneSettings(PropertyGroup):
         default="",
     )
 
+    # --- BVH Import Settings ---
+    bvh_scale: FloatProperty(
+        name="BVH Scale",
+        description="Scale factor for imported BVH (0.01 = cm to meters, 0.1 = mm to meters, 1.0 = meters)",
+        default=0.01,
+        min=0.001,
+        max=100.0,
+    )
+
     # --- Bake settings ---
     bake_start_frame: IntProperty(name="Start Frame", default=1, min=0)
     bake_end_frame: IntProperty(name="End Frame", default=250, min=1)

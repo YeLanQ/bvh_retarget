@@ -30,6 +30,11 @@ class BVHRETARGET_PT_Import(BVHRETARGET_PanelBase, Panel):
         layout = self.layout
         s = context.scene.bvh_retarget
 
+        # Import settings
+        box = layout.box()
+        box.label(text="Import Settings:", icon='PREFERENCES')
+        box.prop(s, "bvh_scale", text="Scale")
+
         # Import button
         row = layout.row(align=True)
         row.scale_y = 1.5

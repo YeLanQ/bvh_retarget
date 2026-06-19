@@ -61,11 +61,12 @@ _BONE_MAP_HINTS = [
 
 
 def _normalize(name: str) -> str:
-    """Lowercase, strip prefix up to ':', remove non-alphanumeric."""
+    """Lowercase, strip prefix up to ':', remove non-alphanumeric except underscore."""
     name = name.lower()
     if ":" in name:
         name = name.split(":")[-1]
-    return re.sub(r"[^a-z0-9]", "", name)
+    # Keep underscore as it's a common bone naming separator
+    return re.sub(r"[^a-z0-9_]", "", name)
 
 
 def auto_build_mapping(source_arm: bpy.types.Object,
@@ -163,7 +164,16 @@ def apply_retargeting_constraints(
             if c.name.startswith(CONSTRAINT_PREFIX):
                 tgt_pbone.constraints.remove(c)
 
-        is_root = (tgt_name == root_bone) or (src_name.lower() in ("hips", "pelvis", "root"))
+        # Root bone detection: user-specified takes priority, then auto-detect
+        if root_bone:
+            is_root = (tgt_name == root_bone)
+        else:
+            # Auto-detect root bone by checking common naming conventions
+            src_name_lower = src_name.lower()
+            is_root = src_name_lower in ("hips", "pelvis", "root") or \
+                      src_name_lower.endswith(":hips") or \
+                      src_name_lower.endswith(":pelvis") or \
+                      src_name_lower.endswith(":root")
 
         if mode == "COPY_ROTATION":
             _add_copy_rotation(tgt_pbone, source_arm, src_name, is_root)
@@ -193,6 +203,9 @@ def _add_copy_rotation(pbone, source_arm, src_name: str, is_root: bool = False) 
         loc.name = CONSTRAINT_PREFIX + "Location"
         loc.target = source_arm
         loc.subtarget = src_name
+        loc.mix_mode = 'REPLACE'
+        loc.owner_space = 'LOCAL'
+        loc.target_space = 'LOCAL'
         loc.use_offset = False
 
     rot = pbone.constraints.new("COPY_ROTATION")
@@ -200,8 +213,8 @@ def _add_copy_rotation(pbone, source_arm, src_name: str, is_root: bool = False) 
     rot.target = source_arm
     rot.subtarget = src_name
     rot.mix_mode = 'REPLACE'
-    rot.owner_space = 'WORLD'
-    rot.target_space = 'WORLD'
+    rot.owner_space = 'LOCAL'
+    rot.target_space = 'LOCAL'
 
 
 def _add_copy_transforms(pbone, source_arm, src_name: str) -> None:
@@ -236,11 +249,13 @@ def _add_child_of(pbone, source_arm, src_name: str, rotation_only: bool = False)
     co.use_scale_y = False
     co.use_scale_z = False
 
-    # Set Inverse: invert the source bone's current world matrix so the
+    # Set Inverse: invert the source bone's rest pose world matrix so the
     # target bone stays exactly where it is when the constraint first fires.
-    src_pbone = source_arm.pose.bones.get(src_name)
-    if src_pbone:
-        co.inverse_matrix = (source_arm.matrix_world @ src_pbone.matrix).inverted()
+    # Using the bone's rest pose matrix instead of current pose matrix
+    # ensures correct behavior regardless of which frame the constraint is applied on.
+    src_bone = source_arm.data.bones.get(src_name)
+    if src_bone:
+        co.inverse_matrix = (source_arm.matrix_world @ src_bone.matrix_local).inverted()
     else:
         co.inverse_matrix = mathutils.Matrix.Identity(4)
 
