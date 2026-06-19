@@ -232,6 +232,37 @@ class BVHRETARGET_OT_RemoveRetargeting(Operator):
         return {'FINISHED'}
 
 
+class BVHRETARGET_OT_RemoveSingleRetargeting(Operator):
+    """Remove retargeting constraints from the selected bone mapping's target bone"""
+    bl_idname = "bvh_retarget.remove_single_retargeting"
+    bl_label = "Remove Single"
+
+    bone_name: StringProperty(
+        name="Target Bone",
+        description="Remove constraints from this target bone",
+        default="",
+    )
+
+    def execute(self, context):
+        s = context.scene.bvh_retarget
+        if not s.target_armature:
+            self.report({'ERROR'}, "Set Target Armature.")
+            return {'CANCELLED'}
+        bone = self.bone_name.strip()
+        if not bone:
+            self.report({'WARNING'}, "No target bone specified.")
+            return {'CANCELLED'}
+        if bone not in s.target_armature.data.bones:
+            self.report({'WARNING'}, f"Bone '{bone}' not found in target armature.")
+            return {'CANCELLED'}
+        n = rt.remove_retargeting_constraints_for_bone(s.target_armature, bone)
+        if n:
+            self.report({'INFO'}, f"Removed {n} constraint(s) from '{bone}'")
+        else:
+            self.report({'INFO'}, f"No retargeting constraints on '{bone}'")
+        return {'FINISHED'}
+
+
 class BVHRETARGET_OT_BakeRetargeting(Operator):
     """Bake the retargeted animation into keyframes and remove constraints"""
     bl_idname = "bvh_retarget.bake_retargeting"
@@ -410,6 +441,7 @@ _classes = [
     BVHRETARGET_OT_RemoveBoneMapping,
     BVHRETARGET_OT_ApplyRetargeting,
     BVHRETARGET_OT_RemoveRetargeting,
+    BVHRETARGET_OT_RemoveSingleRetargeting,
     BVHRETARGET_OT_BakeRetargeting,
     BVHRETARGET_OT_SavePreset,
     BVHRETARGET_OT_LoadPreset,

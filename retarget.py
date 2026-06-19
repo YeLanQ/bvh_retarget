@@ -282,6 +282,19 @@ def remove_retargeting_constraints(target_arm: bpy.types.Object) -> int:
     return removed
 
 
+def remove_retargeting_constraints_for_bone(target_arm: bpy.types.Object,
+                                            bone_name: str) -> int:
+    """Removes retargeting constraints from a single bone. Returns count removed."""
+    removed = 0
+    pbone = target_arm.pose.bones.get(bone_name)
+    if pbone:
+        for c in list(pbone.constraints):
+            if c.name.startswith(CONSTRAINT_PREFIX):
+                pbone.constraints.remove(c)
+                removed += 1
+    return removed
+
+
 # ---------------------------------------------------------------------------
 # Baking
 # ---------------------------------------------------------------------------

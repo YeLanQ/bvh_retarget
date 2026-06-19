@@ -31,6 +31,12 @@ class BVHRETARGET_UL_BoneMappings(UIList):
             # Retarget mode
             row.prop(item, "retarget_mode", text="")
 
+            # Remove single constraints button
+            if item.target_bone:
+                op = row.operator("bvh_retarget.remove_single_retargeting",
+                                  text="", icon='X', emboss=False)
+                op.bone_name = item.target_bone
+
         elif self.layout_type == 'GRID':
             layout.alignment = 'CENTER'
             layout.label(text="", icon='BONE_DATA')
