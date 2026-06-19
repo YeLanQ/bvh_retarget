@@ -30,3 +30,6 @@ Desktop.ini
 
 # Archives
 *.zip
+
+# Temp
+temp_package/
