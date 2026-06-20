@@ -43,9 +43,7 @@ $FilesToInclude = @(
     "panels.py",
     "properties.py",
     "retarget.py",
-    "ui_list.py",
-    "README.md",
-    "TECHNICAL_DOC.md"
+    "ui_list.py"
 )
 
 # 创建临时目录
