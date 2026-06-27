@@ -17,8 +17,8 @@ Requirements:
 
 bl_info = {
     "name": "BVH Retarget",
-    "author": "Kimodo Bridge Contributors",
-    "version": (1, 0, 0),
+    "author": "YeLanQ",
+    "version": (1, 0, 2),
     "blender": (4, 2, 0),
     "location": "View3D > Sidebar (N-Panel) > BVH Retarget",
     "description": "Retarget BVH motion capture data to any Blender armature",

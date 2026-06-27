@@ -6,13 +6,25 @@ $ErrorActionPreference = "Stop"
 # 获取当前目录
 $SourceDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-# 读取版本号
-$Version = "1.0.0"
+# 从 __init__.py 读取版本号（主要来源）
+$Version = "0.0.0"
+$InitFile = Join-Path $SourceDir "__init__.py"
+if (Test-Path $InitFile) {
+    $Content = Get-Content $InitFile -Raw
+    if ($Content -match '"version":\s*\((\d+),\s*(\d+),\s*(\d+)\)') {
+        $Version = "$($Matches[1]).$($Matches[2]).$($Matches[3])"
+    }
+}
+
+# 校验 blender_manifest.toml 版本一致性
 $ManifestFile = Join-Path $SourceDir "blender_manifest.toml"
 if (Test-Path $ManifestFile) {
     $Content = Get-Content $ManifestFile -Raw
     if ($Content -match 'version\s*=\s*"([^"]+)"') {
-        $Version = $Matches[1]
+        $ManifestVersion = $Matches[1]
+        if ($ManifestVersion -ne $Version) {
+            Write-Host "WARNING: blender_manifest.toml version ($ManifestVersion) != __init__.py version ($Version)" -ForegroundColor Yellow
+        }
     }
 }
 

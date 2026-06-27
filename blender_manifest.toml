@@ -1,10 +1,10 @@
 schema_version = "1.0.0"
 
 id = "bvh_retarget"
-version = "1.0.0"
+version = "1.0.2"
 name = "BVH Retarget"
 tagline = "Retarget BVH motion capture data to any Blender armature"
-maintainer = "Kimodo Bridge Contributors"
+maintainer = "YeLanQ"
 type = "add-on"
 
 blender_version_min = "4.2.0"
