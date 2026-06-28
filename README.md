@@ -111,7 +111,7 @@ extra/bvh_retarget/
 
 ## 许可证
 
-GPL-2.0-or-later
+GPL-3.0-or-later
 
 ## 致谢
 

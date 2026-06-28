@@ -13,6 +13,8 @@ Features:
 
 Requirements:
   - Blender 4.2+
+
+SPDX-License-Identifier: GPL-3.0-or-later
 """
 
 bl_info = {
